@@ -26,6 +26,16 @@ jobs:
       - name: 🧪 Run Unit Tests
         run: mvn test
 
+      - name: 🧪 Run Unit Tests
+        run: mvn test
+
+      - name: 📄 Upload JUnit Test Report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: junit-report
+          path: target/surefire-reports/
+
       - name: 📦 Package App (no tests)
         run: mvn package -DskipTests
 

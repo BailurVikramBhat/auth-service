@@ -1,4 +1,4 @@
-package com.devcircle.auth.auth_service;
+package com.devcircle.auth;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
