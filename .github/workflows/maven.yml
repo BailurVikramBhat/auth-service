@@ -1,0 +1,27 @@
+name: 🚀 DevCircle Backend CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: 📦 Build with Maven
+        run: mvn clean install -DskipTests
+
+      - name: ✅ Verify build success
+        run: echo "Build completed!"
