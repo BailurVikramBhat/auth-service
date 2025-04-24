@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
       - name: ☕ Setup Java
@@ -20,8 +20,21 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: 📦 Build with Maven
-        run: mvn clean install -DskipTests
+      - name: 🧹 Clean & Compile
+        run: mvn clean compile
 
-      - name: ✅ Verify build success
-        run: echo "Build completed!"
+      - name: 🧪 Run Unit Tests
+        run: mvn test
+
+      - name: 📄 Upload Test Report (JUnit)
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-report
+          path: target/surefire-reports/
+
+      - name: 📦 Package App (no tests)
+        run: mvn package -DskipTests
+
+      - name: ✅ Done
+        run: echo "🚀 Build complete. Artifacts are ready!"

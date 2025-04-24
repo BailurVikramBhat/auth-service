@@ -11,7 +11,7 @@ This service handles user registration, login, password hashing, and JWT-based a
 
 > 🔐 Secure. ☁️ Scalable. 💥 Swagger-documented.
 
-![CI](https://github.com/BailurVikramBhat/devcircle-auth-service/actions/workflows/maven.yml/badge.svg)
+![CI](https://github.com/BailurVikramBhat/auth-service/actions/workflows/maven.yml/badge.svg)
 
 ---
 
