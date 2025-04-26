@@ -117,7 +117,7 @@ http://localhost:8081/api/v1/auth
 
 ```json
 {
-  "username": "vikram",
+  "fullName": "vikram bhat",
   "email": "vikram@dc.com",
   "password": "supersecret"
 }
