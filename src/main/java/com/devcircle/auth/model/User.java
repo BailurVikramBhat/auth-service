@@ -19,8 +19,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
+    @Column(name = "full_name", nullable = true)
+    private String fullName;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -36,9 +36,9 @@ public class User {
 
     }
 
-    public User(UUID id, String username, String email, String password, String bio, LocalDateTime createdAt) {
+    public User(UUID id, String fullName, String email, String password, String bio, LocalDateTime createdAt) {
         this.id = id;
-        this.username = username;
+        this.fullName = fullName;
         this.email = email;
         this.password = password;
         this.bio = bio;
@@ -49,8 +49,8 @@ public class User {
         return id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getFullName() {
+        return fullName;
     }
 
     public String getEmail() {
@@ -73,8 +73,8 @@ public class User {
         this.id = id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public void setEmail(String email) {
@@ -108,9 +108,9 @@ public class User {
         return Objects.hash(id);
     }
 
-    public static User build(String username, String email, String password, String bio) {
+    public static User build(String fullName, String email, String password, String bio) {
         User u = new User();
-        u.setUsername(username);
+        u.setFullName(fullName);
         u.setEmail(email);
         u.setPassword(password);
         u.setBio(bio);
