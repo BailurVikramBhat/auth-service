@@ -26,9 +26,6 @@ jobs:
       - name: 🧪 Run Unit Tests
         run: mvn test
 
-      - name: 🧪 Run Unit Tests
-        run: mvn test
-
       - name: 📦 Package App (no tests)
         run: mvn package -DskipTests
 
