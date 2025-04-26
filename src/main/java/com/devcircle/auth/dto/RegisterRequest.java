@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 
 public class RegisterRequest {
 
-    @NotBlank(message = "Username is required.")
-    private String username;
+    @NotBlank(message = "Full name is required.")
+    private String fullName;
 
     @NotBlank(message = "Email is required.")
     @Email(message = "Email is not valid.")
@@ -15,8 +15,8 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required.")
     private String password;
 
-    public String getUsername() {
-        return username;
+    public String getFullName() {
+        return fullName;
     }
 
     public String getEmail() {
@@ -27,8 +27,8 @@ public class RegisterRequest {
         return password;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public void setEmail(String email) {

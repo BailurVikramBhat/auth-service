@@ -1,6 +1,5 @@
 package com.devcircle.auth.service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,17 +26,13 @@ public class UserService {
     }
 
     public UUID register(RegisterRequest request) {
-        // TODO: Check email, username already exists
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email is already in use.");
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new DuplicateResourceException("Username is already in use.");
-        }
 
         String hashedPassword = encoder.encode(request.getPassword());
-        User user = User.build(request.getUsername(), request.getEmail(), hashedPassword, null);
+        User user = User.build(request.getFullName(), request.getEmail(), hashedPassword, null);
 
         return userRepository.save(user).getId();
     }
