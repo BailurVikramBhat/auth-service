@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.devcircle.auth.dto.LoginRequest;
+import com.devcircle.auth.dto.LoginResponse;
 import com.devcircle.auth.dto.RegisterRequest;
 import com.devcircle.auth.dto.RegisterResponse;
 import com.devcircle.auth.exception.DuplicateResourceException;
@@ -38,13 +39,14 @@ public class UserService {
                 "Successfully created the user");
     }
 
-    public String login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Email id not found."));
         if (!encoder.matches(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Incorrect password.");
         }
-        return jwtService.generateToken(user.getEmail());
+        String jwt = jwtService.generateToken(user.getEmail());
+        return new LoginResponse(user.getId(), jwt);
     }
 
 }

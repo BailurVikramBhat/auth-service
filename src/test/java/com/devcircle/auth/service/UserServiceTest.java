@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import com.devcircle.auth.dto.LoginRequest;
+import com.devcircle.auth.dto.LoginResponse;
 import com.devcircle.auth.dto.RegisterRequest;
 import com.devcircle.auth.dto.RegisterResponse;
 import com.devcircle.auth.exception.DuplicateResourceException;
@@ -55,7 +56,7 @@ public class UserServiceTest {
         when(jwtService.generateToken(req.getEmail())).thenReturn("jwt-token");
 
         RegisterResponse response = userService.register(req);
-        assertEquals(fakeId, response.uuid());
+        assertEquals(fakeId, response.userId());
         assertEquals("jwt-token", response.token());
 
         InOrder inOrder = inOrder(userRepository, passwordEncoder, userRepository, jwtService);
@@ -81,42 +82,69 @@ public class UserServiceTest {
     }
 
     @Test
-    void login_whenEmailNotFound_throwsInvalidCredentials() {
-        var req = new LoginRequest();
-        req.setEmail("nouser@dc.com");
-        req.setPassword("pw");
-        when(userRepository.findByEmail(req.getEmail()))
-                .thenReturn(Optional.empty());
+    void login_NonExistingEmail_ThrowsResourceNotFoundException() {
+        // Arrange
+        LoginRequest request = new LoginRequest();
+        request.setEmail("unknown@example.com");
+        request.setPassword("password");
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
-        assertThrows(InvalidCredentialsException.class, () -> userService.login(req));
+        // Act & Assert
+        assertThrows(InvalidCredentialsException.class, () -> userService.login(request));
+
+        verify(userRepository).findByEmail(request.getEmail());
+        verifyNoMoreInteractions(userRepository, passwordEncoder, jwtService);
     }
 
     @Test
-    void login_whenPasswordWrong_throwsInvalidCredentials() {
-        var req = new LoginRequest();
-        req.setEmail("u@dc.com");
-        req.setPassword("wrongpw");
-        User u = User.build("U", req.getEmail(), "storedHash", null);
-        when(userRepository.findByEmail(req.getEmail()))
-                .thenReturn(Optional.of(u));
-        when(passwordEncoder.matches("wrongpw", "storedHash")).thenReturn(false);
+    void login_InvalidPassword_ThrowsAuthenticationException() {
+        // Arrange
+        String email = "user@example.com";
+        String rawPassword = "wrongPass";
+        LoginRequest request = new LoginRequest();
+        request.setEmail(email);
+        request.setPassword(rawPassword);
+        User user = User.build("Ramesh Kumar", email, "hashedPwd", null);
+        user.setId(UUID.randomUUID());
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, user.getPassword())).thenReturn(false);
 
-        assertThrows(InvalidCredentialsException.class, () -> userService.login(req));
+        // Act & Assert
+        assertThrows(InvalidCredentialsException.class, () -> userService.login(request));
+
+        InOrder inOrder = inOrder(userRepository, passwordEncoder);
+        inOrder.verify(userRepository).findByEmail(email);
+        inOrder.verify(passwordEncoder).matches(rawPassword, user.getPassword());
+        verifyNoMoreInteractions(userRepository, passwordEncoder, jwtService);
     }
 
     @Test
-    void login_whenCredentialsValid_returnsJwt() {
-        var req = new LoginRequest();
-        req.setEmail("vikram@dc.com");
-        req.setPassword("rightpw");
-        User u = User.build("Vikram", "vikram@dc.com", "hash123", null);
-        when(userRepository.findByEmail("vikram@dc.com"))
-                .thenReturn(Optional.of(u));
-        when(passwordEncoder.matches("rightpw", "hash123")).thenReturn(true);
-        when(jwtService.generateToken("vikram@dc.com")).thenReturn("tokenXYZ");
+    void login_ValidCredentials_ReturnsLoginResponse() {
+        // Arrange
+        String email = "jane.doe@example.com";
+        String rawPassword = "correctPass";
+        LoginRequest request = new LoginRequest();
+        request.setEmail(email);
+        request.setPassword(rawPassword);
+        UUID userId = UUID.randomUUID();
+        User user = User.build("Jane Doe", email, "hashedPwd", null);
+        user.setId(userId);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, "hashedPwd")).thenReturn(true);
+        when(jwtService.generateToken(email)).thenReturn("jwt-token");
 
-        String token = userService.login(req);
-        assertEquals("tokenXYZ", token);
+        // Act
+        LoginResponse response = userService.login(request);
+
+        // Assert
+        assertEquals(userId, response.userId());
+        assertEquals("jwt-token", response.token());
+
+        InOrder inOrder = inOrder(userRepository, passwordEncoder, jwtService);
+        inOrder.verify(userRepository).findByEmail(email);
+        inOrder.verify(passwordEncoder).matches(rawPassword, "hashedPwd");
+        inOrder.verify(jwtService).generateToken(email);
+        verifyNoMoreInteractions(userRepository, passwordEncoder, jwtService);
     }
 
 }

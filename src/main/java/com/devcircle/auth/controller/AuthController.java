@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devcircle.auth.dto.LoginRequest;
+import com.devcircle.auth.dto.LoginResponse;
 import com.devcircle.auth.dto.RegisterRequest;
 import com.devcircle.auth.dto.RegisterResponse;
 import com.devcircle.auth.service.UserService;
@@ -30,13 +31,13 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         RegisterResponse response = userService.register(request);
-        URI location = URI.create("/users/" + response.uuid());
+        URI location = URI.create("/users/" + response.userId());
         return ResponseEntity.status(HttpStatus.CREATED).location(location).body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
-        String token = userService.login(request);
-        return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
+        LoginResponse response = userService.login(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
