@@ -127,8 +127,9 @@ http://localhost:8081/api/v1/auth
 
 ```json
 {
-  "message": "User registered successfully.",
-  "userId": "uuid-value-here"
+  "userId": "ad9b930c-25fb-4f04-b8b5-bf1c2737c0b7",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJyYW1lc2hAZGRjLmNvbSIsImlhdCI6MTc0NTc2OTMyOCwiZXhwIjoxNzQ1ODU1NzI4fQ.TNKeApsoz2lpM6wTlfdcomc2haijq8KRuo1zA31Su_s",
+  "message": "Successfully created the user"
 }
 ```
 
@@ -151,8 +152,8 @@ http://localhost:8081/api/v1/auth
 
 ```json
 {
-  "message": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+  "uuid": "8451a7fd-a293-4f2a-8a19-b49f3dd4dba7",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraXNoYW5AZGRjLmNvbSIsImlhdCI6MTc0NTc2ODE0NCwiZXhwIjoxNzQ1ODU0NTQ0fQ.__witbn0vbVRDcRme-IfO2bmWyh8NAzo2QgzRPT_cg8"
 }
 ```
 
