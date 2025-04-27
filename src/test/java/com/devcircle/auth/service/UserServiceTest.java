@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 import com.devcircle.auth.dto.LoginRequest;
 import com.devcircle.auth.dto.RegisterRequest;
+import com.devcircle.auth.dto.RegisterResponse;
 import com.devcircle.auth.exception.DuplicateResourceException;
 import com.devcircle.auth.exception.InvalidCredentialsException;
 import com.devcircle.auth.model.User;
@@ -38,7 +40,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
-    void registerSuccess_returnsNewUuid() {
+    void registerSuccess_returnsRegisterResponse() {
         var req = new RegisterRequest();
         req.setFullName("Vikram Bhat");
         req.setEmail("info@google.com");
@@ -49,15 +51,19 @@ public class UserServiceTest {
         var saved = User.build(req.getFullName(), req.getEmail(), "mockEncodedPassword", null);
         UUID fakeId = UUID.randomUUID();
         saved.setId(fakeId);
-        when(userRepository.save(any())).thenReturn(saved);
+        when(userRepository.save(any(User.class))).thenReturn(saved);
+        when(jwtService.generateToken(req.getEmail())).thenReturn("jwt-token");
 
-        UUID result = userService.register(req);
-        assertEquals(fakeId, result);
+        RegisterResponse response = userService.register(req);
+        assertEquals(fakeId, response.uuid());
+        assertEquals("jwt-token", response.token());
 
-        // verify repo.save was called with a User whose fields match
-        verify(userRepository).save(argThat(u -> u.getFullName().equals(req.getFullName()) &&
-                u.getEmail().equals(req.getEmail()) &&
-                u.getPassword().equals("mockEncodedPassword")));
+        InOrder inOrder = inOrder(userRepository, passwordEncoder, userRepository, jwtService);
+        inOrder.verify(userRepository).existsByEmail(req.getEmail());
+        inOrder.verify(passwordEncoder).encode(req.getPassword());
+        inOrder.verify(userRepository).save(any(User.class));
+        inOrder.verify(jwtService).generateToken(req.getEmail());
+        verifyNoMoreInteractions(userRepository, passwordEncoder, jwtService);
     }
 
     @Test

@@ -1,12 +1,11 @@
 package com.devcircle.auth.service;
 
-import java.util.UUID;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.devcircle.auth.dto.LoginRequest;
 import com.devcircle.auth.dto.RegisterRequest;
+import com.devcircle.auth.dto.RegisterResponse;
 import com.devcircle.auth.exception.DuplicateResourceException;
 import com.devcircle.auth.exception.InvalidCredentialsException;
 import com.devcircle.auth.model.User;
@@ -25,16 +24,18 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    public UUID register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email is already in use.");
         }
-
         String hashedPassword = encoder.encode(request.getPassword());
         User user = User.build(request.getFullName(), request.getEmail(), hashedPassword, null);
 
-        return userRepository.save(user).getId();
+        User savedUser = userRepository.save(user);
+        String jwt = jwtService.generateToken(savedUser.getEmail());
+        return new RegisterResponse(savedUser.getId(), jwt,
+                "Successfully created the user");
     }
 
     public String login(LoginRequest request) {
