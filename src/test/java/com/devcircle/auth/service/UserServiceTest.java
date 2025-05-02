@@ -1,5 +1,6 @@
 package com.devcircle.auth.service;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,8 +53,13 @@ public class UserServiceTest {
         var saved = User.build(req.getFullName(), req.getEmail(), "mockEncodedPassword", null);
         UUID fakeId = UUID.randomUUID();
         saved.setId(fakeId);
-        when(userRepository.save(any(User.class))).thenReturn(saved);
-        when(jwtService.generateToken(req.getEmail())).thenReturn("jwt-token");
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> {
+                    User u = invocation.getArgument(0, User.class);
+                    u.setId(fakeId);
+                    return u;
+                });
+        when(jwtService.generateToken(fakeId, req.getEmail(), Collections.emptyList())).thenReturn("jwt-token");
 
         RegisterResponse response = userService.register(req);
         assertEquals(fakeId, response.userId());
@@ -63,7 +69,7 @@ public class UserServiceTest {
         inOrder.verify(userRepository).existsByEmail(req.getEmail());
         inOrder.verify(passwordEncoder).encode(req.getPassword());
         inOrder.verify(userRepository).save(any(User.class));
-        inOrder.verify(jwtService).generateToken(req.getEmail());
+        inOrder.verify(jwtService).generateToken(fakeId, req.getEmail(), Collections.emptyList());
         verifyNoMoreInteractions(userRepository, passwordEncoder, jwtService);
     }
 
@@ -131,7 +137,7 @@ public class UserServiceTest {
         user.setId(userId);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(rawPassword, "hashedPwd")).thenReturn(true);
-        when(jwtService.generateToken(email)).thenReturn("jwt-token");
+        when(jwtService.generateToken(userId, email, Collections.emptyList())).thenReturn("jwt-token");
 
         // Act
         LoginResponse response = userService.login(request);
@@ -143,7 +149,7 @@ public class UserServiceTest {
         InOrder inOrder = inOrder(userRepository, passwordEncoder, jwtService);
         inOrder.verify(userRepository).findByEmail(email);
         inOrder.verify(passwordEncoder).matches(rawPassword, "hashedPwd");
-        inOrder.verify(jwtService).generateToken(email);
+        inOrder.verify(jwtService).generateToken(userId, email, Collections.emptyList());
         verifyNoMoreInteractions(userRepository, passwordEncoder, jwtService);
     }
 
